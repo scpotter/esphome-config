@@ -4,3 +4,10 @@
 /.esphome/
 /secrets.yaml
 /trash**
+
+# LLM Generated
+../*-secrets/
+.vscode/
+*.log
+*.db
+secrets.yaml
