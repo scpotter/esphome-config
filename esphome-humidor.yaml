@@ -68,7 +68,9 @@ switch:
     id: humidor_state_running
 #    icon: 
     restore_mode: ALWAYS_ON
-#    on_turn_on: set climate to heat
+    optimistic: true
+#   turn_on_action?
+#   on_turn_on: set climate to heat
 #       turn off pause
 #       turn off stop
 
