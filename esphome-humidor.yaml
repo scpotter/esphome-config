@@ -65,7 +65,7 @@ substitutions: ### WARNING Naming Substituion: Adjust during setup #############
 switch:
   - platform: template
     name: "${friendly_devicename}: Run"
-    id: "${friendly_devicename}_runnig"
+    id: humidor_state_running
 #    icon: 
     restore_mode: ALWAYS_ON
 #    on_turn_on: set climate to heat
@@ -75,10 +75,10 @@ switch:
 button:
   - platform: template
     name: "${friendly_devicename}: Run"
-    id: "${friendly_devicename}_run"
+    id: "humidor_state_run"
     on_press:
       then:
-        switch.turn_on: ${friendly_devicename}_runnig
+        switch.turn_on: humidor_state_running
 
 
 #
