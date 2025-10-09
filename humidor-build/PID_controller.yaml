@@ -15,12 +15,13 @@ climate:
 
     control_parameters:
     # See the README for setting up these parameters.
-    # These are over ridden by the number templates above.
+    # These are over ridden by the number templates included in PID_controller_tuning.
     # Currently the defaults match
       kp: 0.15
       ki: 0.0015
       kd: 0
       # output_averaging_samples: 1 # 1 id default
+      # Do these currently require being set on startup with the teampltes included in PID_controller_tuning?
 
     on_state:
     # ON state change, publish the values to the x_term numbers defined 

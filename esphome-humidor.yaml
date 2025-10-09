@@ -21,18 +21,12 @@ packages:
   climate_sensors: !include humidor-build/climate-sensors.yaml
   # Exposes humidity and temp
 ###
-### Control States ###################
-###
-###  Running State: PID Contoller Active
+  # PID Controller & Tuning ###################
   PID_controller: !include humidor-build/PID_controller.yaml
   # PID function to control climate. Exposes algorithm terms as sensors
   PID_tuning: !include humidor-build/PID_controller_tuning.yaml
-  # Optional: Comment/uncomment package to remove/include
+  # Optional?!? (Seems to break the PID if not included) Comment/uncomment package to remove/include? 
   # Exposes algorithm terms as controls for tuning.
-###  # 2: Paused (Lid is Open): Automations
-  #
-###  # 3: Stopped: (Error or mainenance state) Automations
-  #
 ###
 ################################################################################
   template: !include
@@ -67,7 +61,26 @@ substitutions: ### WARNING Naming Substituion: Adjust during setup #############
 ###
 ###  Control State #1 Running: PID Contoller ###################################
 #
-#   Create Automation to set PID thermostat to Heat
+
+switch:
+  - platform: template
+    name: "${friendly_devicename}: Run"
+    id: "${friendly_devicename}_runnig"
+#    icon: 
+    restore_mode: ALWAYS_ON
+#    on_turn_on: set climate to heat
+#       turn off pause
+#       turn off stop
+
+button:
+  - platform: template
+    name: "${friendly_devicename}: Run"
+    id: "${friendly_devicename}_run"
+    on_press:
+      then:
+        switch.turn_on: ${friendly_devicename}_runnig
+
+
 #
 ###  Control State #2 Paused #######################################
 #
