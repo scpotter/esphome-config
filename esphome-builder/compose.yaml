@@ -19,9 +19,16 @@ services:
     # (PAIRING_SOURCE = 10.0.11.184) can pair; if the dashboard needs an explicit
     # --allow-pairing-source or a headless --remote-build-only sibling, add it
     # here then.
-    ports:
-      - "6052:6052"   # dashboard UI
-      - "6055:6055"   # remote-build peer-link
+    #
+    # Host networking (not bridge + published ports): a bridged container never
+    # sees mDNS multicast (224.0.0.251:5353), so the dashboard cannot resolve
+    # <device>.local and every OTA/log path from the stack would have to be
+    # pinned to an IP. On the host stack the container participates in mDNS on
+    # Core/10 and the UniFi reflector bridges it to 11/20/21/25, so the
+    # dashboard resolves devices by name and shows real reachability. 6052/6055
+    # bind directly on the VM 151 host's single NIC (10.0.10.222) -- same
+    # address every consumer already uses. See esphome-SPEC.md §2.
+    network_mode: host
     env_file:
       - ./.env        # ESPHOME_USERNAME / ESPHOME_PASSWORD (rendered by refresh-secrets.sh)
     environment:
