@@ -1,0 +1,41 @@
+# esphome-builder -- ESPHome Device Builder on the VM 151 host.
+#
+# Brought up by ../launch.sh (via dahome_private_config stack-launch.sh), which
+# runs ../refresh-secrets.sh first to render ../secrets.yaml and ./.env.
+#
+# Single compile authority for the estate: the HAOS ESPHome add-on pairs to this
+# instance on 6055 and offloads its compiles here (slice 6 step 19). Sized light
+# per esphome-SPEC.md §1 (development is bubble capacity).
+
+name: esphome-builder
+
+services:
+  device-builder:
+    image: ghcr.io/esphome/esphome:2026.8.2
+    container_name: esphome-builder
+    restart: unless-stopped
+    # Default command runs the Device Builder dashboard on 6052 and the
+    # remote-build peer-link on 6055. Step 19 confirms the HAOS add-on
+    # (PAIRING_SOURCE = 10.0.11.184) can pair; if the dashboard needs an explicit
+    # --allow-pairing-source or a headless --remote-build-only sibling, add it
+    # here then.
+    ports:
+      - "6052:6052"   # dashboard UI
+      - "6055:6055"   # remote-build peer-link
+    env_file:
+      - ./.env        # ESPHOME_USERNAME / ESPHOME_PASSWORD (rendered by refresh-secrets.sh)
+    environment:
+      TZ: "America/New_York"
+      # cross-host WebSocket origin check for the HAOS pairing client
+      ESPHOME_TRUSTED_DOMAINS: "10.0.10.222,10.0.11.184"
+    volumes:
+      - ../:/config                    # the esphome-config checkout (mirror of main)
+      - esphome-build-cache:/config/.esphome
+    deploy:
+      resources:
+        limits:
+          cpus: "3.0"
+          memory: 4G
+
+volumes:
+  esphome-build-cache:
