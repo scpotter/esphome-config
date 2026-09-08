@@ -1,0 +1,27 @@
+# esphome-builder.service -- install on the VM 151 host at
+#   /etc/systemd/system/esphome-builder.service
+# then: systemctl enable --now esphome-builder.timer
+#
+# Runs stack-launch.sh esphome-builder: pulls dahome_private_config + this repo,
+# re-renders secrets.yaml from Infisical + host_config.env, `docker compose up -d`
+# (no-op if the image/compose are unchanged -- no container recreation).
+#
+# This is the refresh mechanism -- the git-side post-commit hook only reminds,
+# and Infisical CE has no usable webhook. A per-launch full re-render is ~5s and
+# these secrets change a few times a year, so a low-frequency timer (below) is
+# the whole story. Edit the paths below to match your host.
+
+[Unit]
+Description=esphome-builder Device Builder stack (dahome)
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+User=padmin
+# reconcile this path in slice 6 step 15 (/opt/dahome/private-config vs
+# /home/padmin/dahome_private_config)
+ExecStart=/opt/dahome/private-config/estate/hosts/stack-launch.sh esphome-builder
+
+[Install]
+WantedBy=multi-user.target

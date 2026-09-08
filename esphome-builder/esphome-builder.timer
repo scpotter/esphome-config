@@ -1,0 +1,17 @@
+# esphome-builder.timer -- install on the VM 151 host at
+#   /etc/systemd/system/esphome-builder.timer
+# then: systemctl enable --now esphome-builder.timer
+#
+# Boots the stack ~2 min after startup, then refreshes every 20 min. Each run is
+# ~5s and does not recreate the container.
+
+[Unit]
+Description=Refresh + keep the esphome-builder stack up (dahome)
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=20min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
