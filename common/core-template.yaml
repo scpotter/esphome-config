@@ -14,7 +14,10 @@ api:
 # Enable Over The Air updates with ESPhome
 ota:
   platform: esphome
-  password: !secret ota_password
+  # password: !secret ota_password
+  # ^ uncommented in dahome slice 6 step 19 (once HAOS offloads compiles to the
+  #   VM 151 stack, whose secrets.yaml has ota_password) -- adding it earlier
+  #   would break any HAOS-local build until HAOS's secrets.yaml gains the key.
 # Wifi provisioning
 wifi:
   ssid: !secret wifi_ssid
