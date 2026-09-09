@@ -12,11 +12,11 @@ packages:
 ### WARNING Template Substitutions: adjust during setup ########################
       devicename: "esphome-desk"       #used as mDNS name
       friendly_devicename: "ESP Desk"  #used in ESP Manager & HA Device
-      device_ip_address: "10.0.20.45"  #must be DHCP reserved. For wifi settings changes / mDNS failures
-### Troubleshooting wifi: Remove commments to override template
+### Troubleshooting wifi: uncomment to override the template's mDNS addressing.
+### desk_ip is sourced from dahome_private_config host_config.env
+### (ESPHOME_BUILDER_DEV_DESK_IP) -> refresh-secrets.sh -> secrets.yaml
 #wifi:
-#  use_address: ${devicename}.local
-#  use_address: ${device_ip_address} #set in Template Substitutions above
+#  use_address: !secret desk_ip
 ###
 substitutions:
 ### WARNING Naming Substituion: Adjust during setup ############################
