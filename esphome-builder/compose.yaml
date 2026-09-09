@@ -4,8 +4,9 @@
 # runs ../refresh-secrets.sh first to render ../secrets.yaml and ./.env.
 #
 # Single compile authority for the estate: the HAOS ESPHome add-on pairs to this
-# instance on 6055 and offloads its compiles here (slice 6 step 19). Sized light
-# per esphome-SPEC.md §1 (development is bubble capacity).
+# instance on 6055 (at vscode.scpotter.com) and offloads its compiles here
+# (slice 6 step 19). Sized light per esphome-SPEC.md §1 (development is bubble
+# capacity).
 
 name: esphome-builder
 
@@ -15,10 +16,11 @@ services:
     container_name: esphome-builder
     restart: unless-stopped
     # Default command runs the Device Builder dashboard on 6052 and the
-    # remote-build peer-link on 6055. Step 19 confirms the HAOS add-on
-    # (PAIRING_SOURCE = 10.0.11.184) can pair; if the dashboard needs an explicit
-    # --allow-pairing-source or a headless --remote-build-only sibling, add it
-    # here then.
+    # remote-build peer-link on 6055. The HAOS add-on pairs over 6055 with the
+    # ESPHOME_USERNAME / ESPHOME_PASSWORD credentials; no --allow-pairing-source
+    # IP pin (6055 is only reachable inside the Internal zone, and HAOS's IP is
+    # not stable). If a headless --remote-build-only sibling is ever needed, add
+    # it here then.
     #
     # Host networking (not bridge + published ports): a bridged container never
     # sees mDNS multicast (224.0.0.251:5353), so the dashboard cannot resolve
@@ -26,15 +28,15 @@ services:
     # pinned to an IP. On the host stack the container participates in mDNS on
     # Core/10 and the UniFi reflector bridges it to 11/20/21/25, so the
     # dashboard resolves devices by name and shows real reachability. 6052/6055
-    # bind directly on the VM 151 host's single NIC (10.0.10.222) -- same
-    # address every consumer already uses. See esphome-SPEC.md §2.
+    # bind directly on the VM 151 host's single NIC (vscode.scpotter.com) --
+    # the same address every consumer already uses. See esphome-SPEC.md §2.
     network_mode: host
     env_file:
-      - ./.env        # ESPHOME_USERNAME / ESPHOME_PASSWORD (rendered by refresh-secrets.sh)
+      # ESPHOME_USERNAME / ESPHOME_PASSWORD / ESPHOME_TRUSTED_DOMAINS, all
+      # rendered by refresh-secrets.sh from host_config.env + Infisical.
+      - ./.env
     environment:
       TZ: "America/New_York"
-      # cross-host WebSocket origin check for the HAOS pairing client
-      ESPHOME_TRUSTED_DOMAINS: "10.0.10.222,10.0.11.184"
     volumes:
       - ../:/config                    # the esphome-config checkout (mirror of main)
       - esphome-build-cache:/config/.esphome

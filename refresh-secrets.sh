@@ -3,11 +3,12 @@ set -euo pipefail
 
 # esphome-config -- render secrets.yaml (tier 4 of the four-tier secrets model).
 #
-# Runs on the VM 151 HOST, invoked by launch.sh (cold start), by the
-# dahome_private_config post-commit hook (host_config.env changed), or by the
-# Infisical webhook listener. Renders ./secrets.yaml in place -- no compose
-# restart; the running Device Builder re-reads it on the next compile. Also
-# renders ./esphome-builder/.env with the dashboard credentials.
+# Runs on the VM 151 HOST, invoked by launch.sh (cold start) or by the 20-min
+# esphome-builder.timer on the host (which also picks up a changed host_config.env
+# -- the post-commit hook in dahome_private_config only prints a reminder).
+# Renders ./secrets.yaml in place -- no compose restart; the running Device
+# Builder re-reads it on the next compile. Also renders ./esphome-builder/.env
+# with the dashboard credentials and the trusted-domains list.
 #
 # secrets.yaml is a gitignored, mode-0600 file. It is recreated on every run and
 # shredded by stop.sh; it is never committed and never in a mirror-clone DR copy.
@@ -82,13 +83,18 @@ umask 077
 } > "${SCRIPT_DIR}/secrets.yaml"
 chmod 600 "${SCRIPT_DIR}/secrets.yaml"
 
-# --- render esphome-builder/.env (the Device Builder dashboard credentials) ---
+# --- render esphome-builder/.env (Device Builder dashboard creds + trusted
+#     domains) --- builder_un / builder_pw are set by the /esphome/ eval above;
+#     TRUSTED_DOMAINS comes from host_config.env (ESPHOME_BUILDER_TRUSTED_DOMAINS,
+#     prefix stripped by stack-launch.sh) -- the hostnames/IPs allowed as the
+#     Host header on the dashboard + remote-build peer link. Not a secret, but
+#     rendered here so it stays out of the public compose file.
 # shellcheck disable=SC2154
 {
   printf 'ESPHOME_USERNAME=%s\n' "${builder_un}"
   printf 'ESPHOME_PASSWORD=%s\n' "${builder_pw}"
+  printf 'ESPHOME_TRUSTED_DOMAINS=%s\n' "${TRUSTED_DOMAINS:?ESPHOME_BUILDER_TRUSTED_DOMAINS missing from host_config.env}"
 } > "${SCRIPT_DIR}/esphome-builder/.env"
-# (builder_un / builder_pw set by the /esphome/ eval above)
 chmod 600 "${SCRIPT_DIR}/esphome-builder/.env"
 
 echo "refresh-secrets: secrets.yaml + esphome-builder/.env rendered"

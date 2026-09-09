@@ -23,8 +23,8 @@ stack are both pull-only mirrors of `main`.
   a `cp secrets.yaml.example secrets.yaml` copy — config/YAML checks only; the
   binary isn't flashable with real credentials.
 - **Routine version bumps**: the HAOS ESPHome add-on stays installed + enabled as
-  a trigger/console, paired to the VM 151 stack (`10.0.10.222:6055`) which does
-  the compile; the add-on OTAs.
+  a trigger/console, paired to the VM 151 stack (`vscode.scpotter.com:6055`)
+  which does the compile; the add-on OTAs.
 - **Real builds + OTA** go through the VM 151 stack — the single compile authority.
 
 `secrets.yaml` is gitignored. On the host it is rendered from Infisical
