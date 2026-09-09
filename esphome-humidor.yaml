@@ -36,9 +36,8 @@ packages:
       devicename: "esphome-humidor"       #used as mDNS name
       friendly_devicename: "ESP Humidor"  #used in ESP Manager & HA Device
 ### Troubleshooting wifi: uncomment to override the template's mDNS addressing.
-### humidor_ip is sourced from dahome_private_config host_config.env
-### (ESPHOME_BUILDER_DEV_HUMIDOR_IP) -> refresh-secrets.sh -> secrets.yaml
 #wifi:
+#  use_address: ${devicename}.local
 #  use_address: !secret humidor_ip
 ###
 substitutions: ### WARNING Naming Substituion: Adjust during setup ############################

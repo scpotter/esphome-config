@@ -13,9 +13,8 @@ packages:
       devicename: "esphome-blank"       #used as mDNS name
       friendly_devicename: "ESP Blank"  #used in ESP Manager & HA Device
 ### Troubleshooting wifi: uncomment to override the template's mDNS addressing.
-### <name>_ip is sourced from dahome_private_config host_config.env
-### (ESPHOME_BUILDER_DEV_<NAME>_IP) -> refresh-secrets.sh -> secrets.yaml
 #wifi:
+#  use_address: ${devicename}.local
 #  use_address: !secret <name>_ip
 ###
 substitutions:

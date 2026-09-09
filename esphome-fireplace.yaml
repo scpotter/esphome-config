@@ -11,9 +11,8 @@ packages:
       devicename: "esphome-fireplace"       #used as mDNS name
       friendly_devicename: "ESP Fireplace"  #used in ESP Manager & HA Device
 ### Troubleshooting wifi: uncomment to override the template's mDNS addressing.
-### fireplace_ip is sourced from dahome_private_config host_config.env
-### (ESPHOME_BUILDER_DEV_FIREPLACE_IP) -> refresh-secrets.sh -> secrets.yaml
 #wifi:
+#  use_address: ${devicename}.local
 #  use_address: !secret fireplace_ip
 ###
 substitutions:

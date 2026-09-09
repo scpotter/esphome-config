@@ -12,12 +12,11 @@ packages:
 ### WARNING Template Substitutions: adjust during setup ########################
       devicename: "esphome-proto"       #used as mDNS name
       friendly_devicename: "ESP Proto"  #used in ESP Manager & HA Device
-### Troubleshooting wifi: uncomment to override the template's mDNS addressing.
-### proto_ip is sourced from dahome_private_config host_config.env
-### (ESPHOME_BUILDER_DEV_PROTO_IP) -> refresh-secrets.sh -> secrets.yaml
-#wifi:
-#  use_address: !secret proto_ip
   switch: !include common/fairylight.yaml
+### Troubleshooting wifi: uncomment to override the template's mDNS addressing.
+#wifi:
+#  use_address: ${devicename}.local
+#  use_address: !secret proto_ip          #must be DHCP reserved. For wifi settings changes / mDNS failures
 ###
 substitutions:
 ### WARNING Naming Substituion: Adjust during setup ############################
