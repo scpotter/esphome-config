@@ -13,6 +13,8 @@ packages:
       devicename: "esphome-proto"       #used as mDNS name
       friendly_devicename: "ESP Proto"  #used in ESP Manager & HA Device
   switch: !include common/fairylight.yaml
+## just a tweak
+#
 ### Troubleshooting wifi: uncomment to override the template's mDNS addressing.
 #wifi:
 #  use_address: ${devicename}.local
