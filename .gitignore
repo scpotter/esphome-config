@@ -13,3 +13,8 @@
 *.log
 *.db
 secrets.yaml
+
+# HAOS-side push-capable deploy key (slice 7a Plan C step 6) -- lives inside
+# the git-tracked tree itself so it persists across HA Core container
+# recreation (SPEC §4), so it must be excluded here explicitly.
+.ssh/
