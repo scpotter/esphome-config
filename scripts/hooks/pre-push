@@ -1,14 +1,44 @@
 #!/usr/bin/env bash
 # Slice 7a Plan C -- pre-push gate for esphome-config.
 #
-# yamllint only, scoped to the files this push actually changes (not the
-# whole tree -- pre-existing content is already live and would otherwise
-# block every future push regardless of relevance).
+# yamllint, scoped to the files this push actually changes (not the whole
+# tree -- pre-existing content is already live and would otherwise block every
+# future push regardless of relevance), plus a !secret coverage check on the
+# pushed commit (check_secret_coverage, below).
 #
-# esphome's own `esphome config` validation is NOT wired here -- same
-# secrets-fixture and host-tooling gap as home-assistant-config's hook; see
-# roadmap/plans/home-assistant-secrets-pipeline-PLAN.md (Plan D).
+# esphome's own `esphome config` validation is NOT wired here: it needs a
+# validated way to run it against a checkout without real device secrets.
 set -euo pipefail
+
+# !secret coverage: every uncommented `!secret <name>` in the pushed commit's
+# YAML must have a top-level key in that commit's secrets.yaml.example. Reads
+# the commit (git show), not the working tree, so an uncommitted edit can
+# neither hide nor cause a failure. A reference inside a YAML comment is not a
+# requirement. This is the one part of the provision-declare-reference workflow
+# a workspace checkout can see; it cannot tell whether the real value exists.
+check_secret_coverage() {
+    local sha="$1" q refs keys missing m
+    q="['\"]"
+    refs="$(
+        git ls-tree -r -z --name-only "$sha" | grep -zE '\.ya?ml$' |
+            while IFS= read -r -d '' f; do git show "${sha}:${f}"; done |
+            sed -E 's/^[[:space:]]*#.*$//; s/[[:space:]]#.*$//' |
+            grep -oE "!secret[[:space:]]+${q}?[A-Za-z0-9_]+" |
+            sed -E "s/^!secret[[:space:]]+${q}?//" | sort -u || true
+    )"
+    keys="$(git show "${sha}:secrets.yaml.example" 2>/dev/null |
+        grep -oE '^[A-Za-z0-9_]+:' | tr -d ':' | sort -u || true)"
+    missing="$(comm -23 <(printf '%s\n' "$refs" | grep -v '^$' || true) \
+        <(printf '%s\n' "$keys" | grep -v '^$' || true))"
+    if [ -n "$missing" ]; then
+        echo "pre-push: !secret coverage failed for ${sha:0:9} -- these uncommented" >&2
+        echo "  !secret references have no key in secrets.yaml.example:" >&2
+        while IFS= read -r m; do printf '    %s\n' "$m" >&2; done <<<"$missing"
+        echo "  Provision the real value first, then declare a fictional entry." >&2
+        return 1
+    fi
+    return 0
+}
 
 empty_tree=4b825dc642cb6eb9a060e54bf8d69288fbee4904
 zero_sha=0000000000000000000000000000000000000000
@@ -16,6 +46,8 @@ had_error=0
 
 while read -r local_ref local_sha remote_ref remote_sha; do
     [ "$local_sha" = "$zero_sha" ] && continue  # deleting a branch, nothing to check
+
+    check_secret_coverage "$local_sha" || had_error=1
 
     if [ "$remote_sha" = "$zero_sha" ]; then
         # New branch/ref on the remote (e.g. a fresh feature branch) -- diff
@@ -42,7 +74,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 done
 
 if [ "$had_error" -ne 0 ]; then
-    echo "pre-push: yamllint failed -- push aborted. Fix the above and retry." >&2
+    echo "pre-push: checks failed -- push aborted. Fix the above and retry." >&2
     exit 1
 fi
 
