@@ -18,3 +18,10 @@ secrets.yaml
 # the git-tracked tree itself so it persists across HA Core container
 # recreation (SPEC §4), so it must be excluded here explicitly.
 .ssh/
+
+# yaml-render-agent / HAOS receiver (slice 7a Plan D): a delivery keeps the previous
+# secrets file next to the live one and stages the incoming one beside it. This
+# repo is public and the HAOS push automation runs `git add -A` in /config/esphome,
+# so both must be ignored or the first delivery would publish a secrets file.
+secrets.yaml.prev
+.secrets.yaml.incoming.*
