@@ -14,7 +14,7 @@ api:
 # Enable Over The Air updates with ESPhome
 ota:
   platform: esphome
-#  password: !secret ota_password ## added during 2026 migration
+  password: !secret ota_password ## added during 2026 migration
 # Wifi provisioning
 wifi:
   ssid: !secret wifi_ssid
