@@ -9,7 +9,7 @@ esphome:
 logger:
 # Enable Home Assistant API and encryption key
 api:
-  encryption: 
+  encryption:
     key: !secret API_key
 # Enable Over The Air updates with ESPhome
 ota:
@@ -38,7 +38,7 @@ text_sensor:
       icon: "mdi:network-outline"
     ssid:
       name: "${device_namelabel}: SSID"
-      icon: "mdi:wifi-settings"      
+      icon: "mdi:wifi-settings"
 sensor:
   - platform: wifi_signal
     name: "${device_namelabel}: WiFi Signal"
