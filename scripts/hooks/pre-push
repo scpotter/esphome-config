@@ -40,37 +40,43 @@ check_secret_coverage() {
     return 0
 }
 
-# Source-mapping row check: every uncommented top-level key in the pushed
-# commit's secrets.yaml.example should have an entry in dahome_private_config's
-# yaml-render-sources/esphome.json -- a static, local, no-network check. A
-# row-less key is the normal in-progress state right after adding a fictional
-# .example entry, so this only warns, never blocks. Whether a mapped row's
-# value actually resolves to something real is deliberately NOT checked here
-# -- that needs Infisical access this container's identity doesn't have for
-# this project, and the operator's call is to keep that a human/render-time
-# concern (Validate, SPEC section 5), not an automated push-time gate.
+# Source resolution, split by source type: every uncommented top-level key
+# in the pushed commit's secrets.yaml.example is classified by
+# check-source-resolution.py (shared across all three pre-push hooks --
+# slice 7a Plan F Stage G). A "host" row is checked in full (row present,
+# its host_config.env var present and non-empty) and BLOCKS if broken --
+# fully knowable locally, no external dependency. An "infisical" row is
+# checked only for its own well-formedness -- WARNS if broken, since this
+# container's identity can't tell "the secret doesn't exist" from "my
+# access is the problem." A row-less key also only warns (the normal
+# in-progress state right after adding a fictional .example entry). The
+# actual Infisical value is never resolved here -- that stays a render-time
+# (Validate) and human concern (SPEC section 5).
 check_source_resolution() {
-    local sha="$1" range="$2" repo_root estate sources keys mapped unmapped k
+    local sha="$1" range="$2" repo_root estate sources hostenv checker out rc
     git diff --name-only "$range" 2>/dev/null | grep -qx 'secrets.yaml.example' || return 0
 
     repo_root="$(git rev-parse --show-toplevel)"
     estate="$(cd "${repo_root}/../estate" && pwd)"
     sources="${estate}/hosts/yaml-render-sources/esphome.json"
+    hostenv="${estate}/host_config.env"
+    checker="${estate}/hosts/check-source-resolution.py"
     if [ ! -f "$sources" ]; then
         echo "pre-push: WARNING -- source-mapping file not found: $sources" >&2
         return 0
     fi
 
-    keys="$(git show "${sha}:secrets.yaml.example" 2>/dev/null |
-        grep -oE '^[A-Za-z0-9_]+:' | tr -d ':' | sort -u || true)"
-    mapped="$(grep -oE '^\s*"[A-Za-z0-9_]+":' "$sources" |
-        tr -d '": \t' | grep -v '^_comment$' | sort -u || true)"
-    unmapped="$(comm -23 <(printf '%s\n' "$keys" | grep -v '^$' || true) \
-        <(printf '%s\n' "$mapped" | grep -v '^$' || true))"
-    if [ -n "$unmapped" ]; then
-        echo "pre-push: WARNING -- these secrets.yaml.example keys have no entry" >&2
-        echo "  in $(basename "$sources") yet (not blocking; add one before this key is actually used):" >&2
-        while IFS= read -r k; do printf '    %s\n' "$k" >&2; done <<<"$unmapped"
+    rc=0
+    out="$(git show "${sha}:secrets.yaml.example" 2>/dev/null |
+        uv run --no-project --with pyyaml python3 "$checker" "$sources" "$hostenv" 2>&1)" || rc=$?
+
+    if [ "$rc" -ne 0 ]; then
+        echo "pre-push: WARNING -- source-resolution check itself failed to run (${out:-no output}); not blocking on a check that couldn't run." >&2
+        return 0
+    fi
+    if [ -n "$out" ]; then
+        echo "$out" | sed -E 's/^BLOCK: /pre-push: /; s/^WARN: /pre-push: WARNING -- /' >&2
+        echo "$out" | grep -q '^BLOCK:' && return 1
     fi
     return 0
 }
