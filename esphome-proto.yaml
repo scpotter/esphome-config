@@ -17,8 +17,8 @@ packages:
 #
 ### Troubleshooting wifi: uncomment to override the template's mDNS addressing.
 wifi:
-#  use_address: ${devicename}.local
-  use_address: !secret proto_ip         #must be DHCP reserved. For wifi settings changes / mDNS failures
+#  use_address: ${devicename}.local      #BROKEN: vars will not resolve as written. 
+#  use_address: !secret proto_ip         #must be DHCP reserved. For wifi settings changes / mDNS failures
 ###
 substitutions:
 ### WARNING Naming Substituion: Adjust during setup ############################
