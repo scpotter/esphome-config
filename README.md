@@ -12,26 +12,20 @@ There are two special devices:
 
 ## Build & deploy
 
-Firmware compiles on **VM 151** (the `esphome-builder` Device Builder stack, not
-HAOS). GitHub is the source of truth; HAOS's `/config/esphome` and the VM 151
-stack are both pull-only mirrors of `main`.
+GitHub is the source of truth. HAOS's `/config/esphome` is a pull-only mirror of
+`main`.
 
-- **VM 151 host** brings the stack up with `dahome_private_config/estate/hosts/stack-launch.sh esphome-builder`
-  (which runs `launch.sh` → `refresh-secrets.sh` → `docker compose`). `stop.sh`
-  shreds the rendered secrets.
-- **Active dev** (VM 151 workspace): `esphome config` / `esphome compile` against
-  a `cp secrets.yaml.example secrets.yaml` copy — config/YAML checks only; the
-  binary isn't flashable with real credentials.
-- **Routine version bumps**: the HAOS ESPHome add-on stays installed + enabled as
-  a trigger/console, paired to the VM 151 stack (`vscode.scpotter.com:6055`)
-  which does the compile; the add-on OTAs.
-- **Real builds + OTA** go through the VM 151 stack — the single compile authority.
+- **Active dev** (VM 151 workspace): `esphome config` validates against the real
+  `secrets.yaml`, which the estate's render agent delivers into the checkout
+  (gitignored; see `secrets.yaml.example` for its keys). Builds and installs from
+  VM 151 come with its own Device Builder, documented here once it exists.
+- **Routine version bumps and real builds**: the HAOS ESPHome add-on stays
+  installed and enabled as a trigger and console, paired to the ESPHome build
+  server (LXC 252), which does the compile; the add-on OTAs.
 
-`secrets.yaml` is gitignored. On the host it is rendered from Infisical
-(`core-infra` `/wifi/potter_net/` + `smarthome-selfhosted` `/esphome/`) by
-`refresh-secrets.sh`; per-device fallback IPs come from
-`dahome_private_config`'s `host_config.env`. See `secrets.yaml.example` and
-`example.env`.
+`secrets.yaml` is rendered from Infisical (`core-infra` `/wifi/potter_net/` +
+`smarthome-selfhosted` `/esphome/`) by the estate's `yaml-render-agent`;
+per-device fallback IPs come from `dahome_private_config`'s `host_config.env`.
 
 ## Critical devices
 
