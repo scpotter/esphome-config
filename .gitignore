@@ -5,6 +5,8 @@
 # ESPHome Device Builder state kept in the config directory: preferences, its
 # sidecar, and the peer-link private key. Never commit these.
 /.device-builder*
+# The Device Builder's record of the build servers this instance is paired with.
+/.offloader_pairings.json
 /secrets.yaml
 /trash**
 
