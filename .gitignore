@@ -2,6 +2,9 @@
 # This is an example and may include too much for your use-case.
 # You can modify this file to suit your needs.
 /.esphome/
+# ESPHome Device Builder state kept in the config directory: preferences, its
+# sidecar, and the peer-link private key. Never commit these.
+/.device-builder*
 /secrets.yaml
 /trash**
 
