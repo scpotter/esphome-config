@@ -35,6 +35,7 @@ substitutions:
   # Example: humidity_setpoint_select_low: "65" #Lowest setpoint available in HA
 ###
 ### Custom Device Configuration ################################################
+# stage O test
 ###
 ### Example sub heading ###################################
 ##
